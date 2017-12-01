@@ -194,6 +194,9 @@ const confSchema = `{
 			}
 		}
 	},
+	"default_version_header":{
+		"type": "boolean"
+	},
 	"disable_dashboard_zeroconf": {
 		"type": "boolean"
 	},

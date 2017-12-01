@@ -24,6 +24,7 @@ const (
 	SessionData = iota
 	AuthHeaderValue
 	VersionData
+	VersionDefault
 	OrgSessionContext
 	ContextData
 	RetainHost
@@ -219,6 +220,14 @@ func (s *SuccessHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) *http
 		log.Debug("Upstream Path is: ", r.URL.Path)
 	}
 
+	if ctxGetDefaultVersion(r) {
+		if vinfo := ctxGetVersionInfo(r); vinfo != nil {
+			if config.Global.DefaultVersionHeader {
+				w.Header().Set(defaultVersionHeader, vinfo.Name)
+			}
+		}
+	}
+
 	var copiedRequest *http.Request
 	if recordDetail(r) {
 		copiedRequest = copyRequest(r)
@@ -259,6 +268,14 @@ func (s *SuccessHandler) ServeHTTPWithCache(w http.ResponseWriter, r *http.Reque
 	t1 := time.Now()
 	inRes := s.Proxy.ServeHTTPForCache(w, r)
 	t2 := time.Now()
+
+	if ctxGetDefaultVersion(r) {
+		if vinfo := ctxGetVersionInfo(r); vinfo != nil {
+			if config.Global.DefaultVersionHeader {
+				w.Header().Set(defaultVersionHeader, vinfo.Name)
+			}
+		}
+	}
 
 	var copiedResponse *http.Response
 	if recordDetail(r) {

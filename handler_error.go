@@ -17,6 +17,7 @@ const (
 	defaultTemplateName   = "error"
 	defaultTemplateFormat = "json"
 	defaultContentType    = "application/json"
+	defaultVersionHeader  = "X-Tyk-Default-Version"
 )
 
 // APIError is generic error object returned if there is something wrong with the request
@@ -86,6 +87,14 @@ func (e *ErrorHandler) HandleError(w http.ResponseWriter, r *http.Request, errMs
 	if config.Global.StoreAnalytics(ip) {
 
 		t := time.Now()
+
+		if ctxGetDefaultVersion(r) {
+			if vinfo := ctxGetVersionInfo(r); vinfo != nil {
+				if config.Global.DefaultVersionHeader {
+					w.Header().Set(defaultVersionHeader, vinfo.Name)
+				}
+			}
+		}
 
 		version := e.Spec.getVersionFromRequest(r)
 		if version == "" {
